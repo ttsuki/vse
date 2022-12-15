@@ -19,6 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="base\win32\com_ptr.h" />
+    <ClInclude Include="base\win32\debug.h" />
+    <ClInclude Include="base\win32\event.h" />
+    <ClInclude Include="base\win32\unique_handle.h" />
+    <ClInclude Include="base\win32\memory.h" />
+    <ClInclude Include="base\win32\thread.h" />
+    <ClInclude Include="base\xtl\xtl_ostream.h" />
+    <ClInclude Include="base\xtl\xtl_spin_lock_mutex.h" />
+    <ClInclude Include="base\xtl\xtl_stdc++.h" />
+    <ClInclude Include="base\xtl\xtl_timestamp.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
