@@ -7,7 +7,7 @@
 
 #include "../vse/base/IWaveSource.h"
 #include "../vse/output/AudioRenderingThread.h"
-#include "../vse/output/DirectSoundOutputDevice.h"
+#include "../vse/output/WasapiOutputDevice.h"
 
 #include "utils/SineWave16bitStereoSource.h"
 
@@ -19,7 +19,7 @@ int main()
         std::shared_ptr<vse::IWaveSource> src = std::make_shared<vse_tests::SineWave16bitStereoSource>(440.0f);
 
         std::clog << "Initializing device... " << vse::ToString(src->GetFormat()) << "\n";
-        auto device = vse::CreateDirectSoundOutputDevice();
+        auto device = vse::CreateWasapiOutputDevice();
         if (!device->Open(src->GetFormat()))
         {
             std::clog << "FAILED to Open device!" << std::endl;
