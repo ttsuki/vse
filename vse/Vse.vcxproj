@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="base\CommonTypes.h" />
+    <ClCompile Include="base\Interface.h" />
+    <ClCompile Include="base\IWaveSource.h" />
     <ClInclude Include="base\WaveFormat.h" />
     <ClInclude Include="base\win32\com_ptr.h" />
     <ClInclude Include="base\win32\debug.h" />
