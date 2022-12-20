@@ -14,7 +14,7 @@
 namespace vse::win32
 {
     template <class TInterface>
-    class com_ptr
+    class com_ptr final
     {
         TInterface* pointer_{};
 

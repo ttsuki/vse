@@ -93,6 +93,7 @@ namespace vse
         SpeakerBit channels_{};
         int frequency_{};
 
+        PcmWaveFormat() = default;
         PcmWaveFormat(SampleType format, SpeakerBit channels, int frequency) : format_(format), channels_(channels), frequency_(frequency) {}
 
         [[nodiscard]] SampleType SampleType() const noexcept { return format_; }
