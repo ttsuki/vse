@@ -19,9 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="base\arkxmm.h" />
     <ClCompile Include="base\CommonTypes.h" />
     <ClCompile Include="base\Interface.h" />
     <ClCompile Include="base\IWaveSource.h" />
+    <ClCompile Include="base\IWaveProcessor.h" />
     <ClInclude Include="base\WaveFormat.h" />
     <ClInclude Include="base\win32\com_base.h" />
     <ClInclude Include="base\win32\com_ptr.h" />
@@ -37,11 +39,16 @@
     <ClInclude Include="base\xtl\xtl_spin_lock_mutex.h" />
     <ClInclude Include="base\xtl\xtl_stdc++.h" />
     <ClInclude Include="base\xtl\xtl_timestamp.h" />
+    <ClInclude Include="base\xtl\xtl_temp_memory_buffer.h" />
     <ClCompile Include="output\IOutputDevice.h" />
     <ClInclude Include="output\AudioRenderingThread.h" />
     <ClInclude Include="output\DirectSoundOutputDevice.h" />
     <ClInclude Include="output\WasapiOutputDevice.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="processing\DmoWaveProcessor.h" />
+    <ClInclude Include="processing\WaveFormatConverter.h" />
+    <ClInclude Include="processing\WaveformProcessing.h" />
+    <ClInclude Include="processing\WaveSourceWithProcessing.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="base\WaveFormat.cpp" />
@@ -54,6 +61,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="processing\DmoWaveProcessor.cpp" />
+    <ClCompile Include="processing\WaveFormatConverter.cpp" />
+    <ClCompile Include="processing\WaveformProcessing.cpp" />
+    <ClCompile Include="processing\WaveSourceWithProcessing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Vse.props" />
