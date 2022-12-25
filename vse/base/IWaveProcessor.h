@@ -48,7 +48,7 @@ namespace vse
 
     /// Represents a Parameter store
     template <class ParameterType>
-    class ParameterStore : protected virtual Interface
+    class IParameterStore : protected virtual Interface
     {
     public:
         /// Get All parameters
