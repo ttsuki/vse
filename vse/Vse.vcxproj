@@ -50,6 +50,7 @@
     <ClInclude Include="output\DirectSoundOutputDevice.h" />
     <ClInclude Include="output\WasapiOutputDevice.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="pipeline\SourceSwitcher.h" />
     <ClInclude Include="processing\DirectSoundAudioEffectDsp.h" />
     <ClInclude Include="processing\DmoWaveProcessor.h" />
     <ClInclude Include="processing\WaveFormatConverter.h" />
@@ -70,6 +71,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="pipeline\SourceSwitcher.cpp" />
     <ClCompile Include="processing\DirectSoundAudioEffectDsp.cpp" />
     <ClCompile Include="processing\DmoWaveProcessor.cpp" />
     <ClCompile Include="processing\WaveFormatConverter.cpp" />
