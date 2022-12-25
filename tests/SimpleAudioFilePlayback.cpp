@@ -13,8 +13,10 @@
 #include "../vse/decoding/WaveFileLoader.h"
 #include "../vse/processing/WaveFormatConverter.h"
 #include "../vse/processing/WaveSourceWithProcessing.h"
+#include "../vse/processing/DirectSoundAudioEffectDsp.h"
+#include "../vse/pipeline/SourceSwitcher.h"
 
-int main(int args, const char* argv[])
+int wmain(int args, const wchar_t* argv[])
 {
     if (args <= 1)
     {
@@ -48,6 +50,17 @@ int main(int args, const char* argv[])
             << "\n";
 
         std::shared_ptr<vse::IWaveSource> src = file;
+
+        std::shared_ptr<vse::IWaveSource> s0 = src;
+        std::shared_ptr<vse::IWaveSource> s1 = vse::CreateSourceWithProcessing(src, vse::CreateEchoEffector(src->GetFormat()));
+        std::shared_ptr<vse::IWaveSource> s2 = vse::CreateSourceWithProcessing(src, vse::CreateGargleEffector(src->GetFormat()));
+        std::shared_ptr<vse::IWaveSource> s3 = vse::CreateSourceWithProcessing(src, vse::CreateDistortionEffector(src->GetFormat()));
+        std::shared_ptr<vse::IWaveSource> s4 = vse::CreateSourceWithProcessing(src, vse::CreateWavesReverbEffector(src->GetFormat()));
+        std::shared_ptr<vse::IWaveSource> s5 = vse::CreateSourceWithProcessing(src, vse::CreateChorusEffector(src->GetFormat()));
+        std::shared_ptr<vse::IWaveSource> s6 = vse::CreateSourceWithProcessing(src, vse::CreateFlangerEffector(src->GetFormat()));
+        std::shared_ptr<vse::ISourceSwitcher> sw = vse::CreateSourceSwitcher(s0);
+        src = sw;
+
         src = vse::CreateSourceWithProcessing(src, vse::CreateFormatConverter(src->GetFormat(), device->GetFormat()));
 
         {
@@ -64,6 +77,14 @@ int main(int args, const char* argv[])
                     << "Playing wave..."
                     << " Play time=" << std::fixed << std::setprecision(3) << (static_cast<double>(file->GetSampleCursor()) / file->GetFormat().SamplingFrequency()) << "s."
                     << "\r").str();
+
+                if (::GetAsyncKeyState('0') & 1) { sw->Assign(s0), std::clog << "\x1b[K Effector is switched to OFF." << "\n"; }
+                if (::GetAsyncKeyState('1') & 1) { sw->Assign(s1), std::clog << "\x1b[K Effector is switched to ECHO." << "\n"; }
+                if (::GetAsyncKeyState('2') & 1) { sw->Assign(s2), std::clog << "\x1b[K Effector is switched to GARGLE." << "\n"; }
+                if (::GetAsyncKeyState('3') & 1) { sw->Assign(s3), std::clog << "\x1b[K Effector is switched to DISTORTION." << "\n"; }
+                if (::GetAsyncKeyState('4') & 1) { sw->Assign(s4), std::clog << "\x1b[K Effector is switched to REVERB." << "\n"; }
+                if (::GetAsyncKeyState('5') & 1) { sw->Assign(s5), std::clog << "\x1b[K Effector is switched to CHORUS." << "\n"; }
+                if (::GetAsyncKeyState('6') & 1) { sw->Assign(s6), std::clog << "\x1b[K Effector is switched to FLANGER." << "\n"; }
             }
             while (file->GetSampleCursor() < file->GetTotalSampleCount());
 
