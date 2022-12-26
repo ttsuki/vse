@@ -45,4 +45,32 @@ namespace vse
         /// Sets the current cursor position in samples.
         virtual size_t SetSampleCursor(size_t new_position) = 0;
     };
+
+    /// Represents a random accessible wave buffer
+    class IRandomAccessWaveBuffer : public virtual Interface
+    {
+    public:
+        /// Gets the source format.
+        [[nodiscard]] virtual PcmWaveFormat GetFormat() const = 0;
+
+        /// Reads samples from the buffer.
+        /// @param buffer Destination buffer.
+        /// @param cursor Source position in bytes.
+        /// @param length Length in bytes.
+        /// @returns The number of bytes read to the buffer.
+        [[nodiscard]] virtual size_t Read(void* buffer, size_t cursor, size_t length) const noexcept = 0;
+
+        /// Writes samples to the buffer.
+        /// @param buffer Source buffer.
+        /// @param cursor Destination position in bytes.
+        /// @param length Length in bytes.
+        /// @returns The number of bytes read to the buffer.
+        [[nodiscard]] virtual size_t Write(const void* buffer, size_t cursor, size_t length) noexcept = 0;
+
+        /// Gets the total sample count in bytes.
+        [[nodiscard]] virtual size_t Size() const = 0;
+
+        /// Gets the total sample count in bytes.
+        [[nodiscard]] virtual size_t Resize(size_t length) = 0;
+    };
 }

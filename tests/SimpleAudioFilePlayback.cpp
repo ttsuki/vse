@@ -41,7 +41,7 @@ int wmain(int args, const wchar_t* argv[])
 
         // Loading file
         std::clog << "Loading wave file... \n";
-        std::shared_ptr<vse::ISeekableWaveSource> file = vse::LoadAudioFile(argv[1], file_format_pcm);
+        std::shared_ptr<vse::ISeekableWaveSource> file = vse::LoadAudioFileAsWaveSource(argv[1], file_format_pcm);
 
         std::clog << "Loaded. "
             << " TotalSampleCount=" << file->GetTotalSampleCount() << "."

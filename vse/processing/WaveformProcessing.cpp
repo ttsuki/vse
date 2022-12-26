@@ -7,6 +7,10 @@
 #include <cmath>
 #include <algorithm>
 
+#ifdef __RESHARPER__
+#define __AVX2__
+#endif
+
 #ifdef __AVX2__
 #include "../base/arkxmm.h"
 using namespace arkana;
@@ -207,6 +211,51 @@ namespace vse::processing
             dst[i * 3 + 0] = static_cast<uint8_t>(src[i] >> 8);
             dst[i * 3 + 1] = static_cast<uint8_t>(src[i] >> 16);
             dst[i * 3 + 2] = static_cast<uint8_t>(src[i] >> 24);
+        }
+    }
+
+    void Mix(F32* __restrict dst, const F32* __restrict src, size_t count, float mix) noexcept
+    {
+#ifdef __AVX2__
+        const auto scalev = xmm::f32x8(mix);
+        for (size_t i = 0; i < count / 8; i++)
+        {
+            auto s = xmm::load_u<xmm::vf32x8>(src);
+            auto d = xmm::load_u<xmm::vf32x8>(dst);
+            d = d + s * scalev;
+            xmm::store_u<xmm::vf32x8>(dst, d);
+            src += 8;
+            dst += 8;
+        }
+        count %= 8;
+#endif
+
+        for (size_t i = 0; i < count; i++)
+        {
+            dst[i] += src[i] * mix;
+        }
+    }
+
+    void MixStereo(F32Stereo* __restrict dst, const F32Stereo* __restrict src, size_t count, float lch_mix, float rch_mix) noexcept
+    {
+#ifdef __AVX2__
+        const auto scalev = xmm::f32x8(lch_mix, rch_mix, lch_mix, rch_mix, lch_mix, rch_mix, lch_mix, rch_mix);
+        for (size_t i = 0; i < count / 4; i++)
+        {
+            auto s = xmm::load_u<xmm::vf32x8>(src);
+            auto d = xmm::load_u<xmm::vf32x8>(dst);
+            d = d + s * scalev;
+            xmm::store_u<xmm::vf32x8>(dst, d);
+            src += 4;
+            dst += 4;
+        }
+        count %= 4;
+#endif
+
+        for (size_t i = 0; i < count; i++)
+        {
+            dst[i].l += src[i].l * lch_mix;
+            dst[i].r += src[i].r * rch_mix;
         }
     }
 

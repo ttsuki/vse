@@ -36,6 +36,16 @@ namespace vse
         };
     }
 
+    static inline size_t RoundUpSizeToAlignment(size_t size_in_bytes, PcmWaveFormat format, size_t align_to)
+    {
+        if (const size_t ba = format.BlockAlign() * align_to)
+        {
+            size_in_bytes = (size_in_bytes + ba - 1) / ba * ba;
+            size_in_bytes = std::max(size_in_bytes, align_to * ba);
+        }
+        return size_in_bytes;
+    }
+
     size_t SuggestInputBufferSizeForOutputBufferSize(
         const PcmWaveFormat& input_format,
         const PcmWaveFormat& output_format,
@@ -49,9 +59,7 @@ namespace vse
                 static_cast<uintmax_t>(output_size)
                 * input_format.AvgBytesPerSec()
                 / output_format.AvgBytesPerSec());
-
-            read_size -= read_size % input_format.BlockAlign();
-            read_size = std::max(size_t{16} * input_format.BlockAlign(), read_size);
+            read_size = RoundUpSizeToAlignment(read_size, input_format, 16);
         }
 
         return read_size;
@@ -196,7 +204,11 @@ namespace vse
         void* buffer, size_t buffer_length)
     {
         if (!continuity_.test_and_set())
+        {
             VSE_EXPECT_SUCCESS media_object_->Discontinuity(0);
+            VSE_EXPECT_SUCCESS media_object_->FreeStreamingResources();
+            VSE_EXPECT_SUCCESS media_object_->AllocateStreamingResources();
+        }
 
         size_t rest = buffer_length;
         while (rest)
@@ -207,7 +219,9 @@ namespace vse
             // Processes input
             if (need_more_input_)
             {
-                DWORD read_size = static_cast<DWORD>(SuggestInputBufferSizeForOutputBufferSize(input_format_, output_format_, rest));
+                constexpr int alignment_in_samples = 16;
+                DWORD read_size = static_cast<DWORD>(static_cast<uintmax_t>(rest) * input_format_.AvgBytesPerSec() / output_format_.AvgBytesPerSec());
+                read_size = static_cast<DWORD>(RoundUpSizeToAlignment(read_size, input_format_, alignment_in_samples));
 
                 win32::com_ptr<IMediaBuffer> src_buffer;
                 if (HRESULT hr = VSE_EXPECT_SUCCESS CreateMediaBuffer(read_size, src_buffer.put()); FAILED(hr) || !src_buffer) break;
@@ -215,10 +229,17 @@ namespace vse
                 DWORD len{};
                 if (HRESULT hr = VSE_EXPECT_SUCCESS src_buffer->GetBufferAndLength(&buf, &len); FAILED(hr)) break;
 
-                size_t read = read_source(context, buf, read_size);
+                DWORD read = static_cast<DWORD>(read_source(context, buf, read_size));
                 if (read > 0)
                 {
-                    if (HRESULT hr = VSE_EXPECT_SUCCESS src_buffer->SetLength(static_cast<DWORD>(read)); FAILED(hr)) break;
+                    if (read < read_size)
+                    {
+                        // round up to multiple of 16*sample
+                        read_size = static_cast<DWORD>(RoundUpSizeToAlignment(read, input_format_, alignment_in_samples));
+                        memset(buf + read, 0, read_size - read);
+                    }
+
+                    if (HRESULT hr = VSE_EXPECT_SUCCESS src_buffer->SetLength(read_size); FAILED(hr)) break;
                     if (HRESULT hr = VSE_EXPECT_SUCCESS media_object_->ProcessInput(0, src_buffer.get(), 0, 0, 0); FAILED(hr)) break;
                 }
                 else

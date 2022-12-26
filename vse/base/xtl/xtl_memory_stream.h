@@ -37,6 +37,7 @@ namespace vse::xtl
         [[nodiscard]] size_t read(void* buffer, size_t cursor, size_t length) const
         {
             auto lock = lock_guard();
+            if (cursor > length_) return 0;
             auto slen = length_ - cursor;
             auto size = std::min(slen, length);
 
