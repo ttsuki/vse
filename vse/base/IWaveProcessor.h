@@ -57,4 +57,17 @@ namespace vse
         /// Set All parameters
         virtual void SetParameters(ParameterType parameters) = 0;
     };
+
+    template <class ParameterType>
+    class IParametricWaveProcessor
+        : public IWaveProcessor
+        , public IParameterStore<ParameterType>
+    {
+    public:
+        using IWaveProcessor::GetInputFormat;
+        using IWaveProcessor::GetOutputFormat;
+        using IWaveProcessor::Process;
+        using IParameterStore<ParameterType>::GetParameters;
+        using IParameterStore<ParameterType>::SetParameters;
+    };
 }
