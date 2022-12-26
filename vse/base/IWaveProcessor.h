@@ -44,6 +44,9 @@ namespace vse
                 [](void* ctx, void* buf, size_t len) { return std::invoke(*static_cast<std::remove_reference_t<F*>>(ctx), buf, len); },
                 std::addressof(read_source_function), destination_buffer, destination_buffer_length);
         }
+
+        /// Notify discontinuity
+        virtual void Discontinuity() {}
     };
 
     /// Represents a Parameter store
