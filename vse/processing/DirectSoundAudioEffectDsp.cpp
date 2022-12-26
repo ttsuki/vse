@@ -63,6 +63,8 @@ namespace vse
                 return DmoWaveProcessor::Process(read_source, context, destination_buffer, destination_buffer_length);
             }
 
+            void Discontinuity() override { DmoWaveProcessor::Discontinuity(); }
+
             [[nodiscard]] Parameters GetParameters() const override
             {
                 Parameters parameters{};
