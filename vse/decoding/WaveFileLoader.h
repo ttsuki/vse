@@ -13,7 +13,7 @@
 namespace vse
 {
     [[nodiscard]] std::shared_ptr<ISeekableByteStream> OpenFile(const std::filesystem::path& path);
-    [[nodiscard]] std::shared_ptr<ISeekableByteStream> OpenFile(std::shared_ptr<const void*> memory, size_t length);
+    [[nodiscard]] std::shared_ptr<ISeekableByteStream> OpenFile(std::shared_ptr<const void> memory, size_t length);
     [[nodiscard]] std::shared_ptr<ISeekableByteStream> ReadOutToMemory(std::shared_ptr<ISeekableByteStream> stream);
 
     [[nodiscard]] std::shared_ptr<IWaveSource> CreateWaveSourceMediaFoundation(std::shared_ptr<ISeekableByteStream> file);

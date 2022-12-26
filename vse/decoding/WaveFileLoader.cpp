@@ -56,15 +56,15 @@ namespace vse
         return std::make_shared<StdIFStream>(std::move(stream));
     }
 
-    std::shared_ptr<ISeekableByteStream> OpenFile(std::shared_ptr<const void*> memory, size_t length)
+    std::shared_ptr<ISeekableByteStream> OpenFile(std::shared_ptr<const void> memory, size_t length)
     {
         class XtlFixedMemStream : public ISeekableByteStream
         {
-            std::shared_ptr<const void*> memory_;
+            std::shared_ptr<const void> memory_;
             xtl::fixed_memory_stream_ro ms_;
 
         public:
-            XtlFixedMemStream(std::shared_ptr<const void*> memory, size_t length) : memory_(std::move(memory)), ms_(memory_.get(), length) {}
+            XtlFixedMemStream(std::shared_ptr<const void> memory, size_t length) : memory_(std::move(memory)), ms_(memory_.get(), length) {}
             [[nodiscard]] size_t Size() const override { return ms_.size(); }
             [[nodiscard]] size_t Read(void* buffer, size_t buffer_length) override { return ms_.read(buffer, buffer_length); }
             [[nodiscard]] size_t Tell() const override { return ms_.tellg(); }
