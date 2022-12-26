@@ -13,11 +13,11 @@
 
 namespace vse
 {
-    std::shared_ptr<IWaveSource> CreateSourceWithProcessing(
+    std::shared_ptr<IWaveSourceWithProcessing> CreateSourceWithProcessing(
         std::shared_ptr<IWaveSource> source,
         std::shared_ptr<IWaveProcessor> processor)
     {
-        class Proc : public IWaveSource
+        class Proc : public IWaveSourceWithProcessing
         {
         public:
             std::shared_ptr<IWaveSource> source_;
@@ -35,6 +35,16 @@ namespace vse
             [[nodiscard]] size_t Read(void* buffer, size_t buffer_length) override
             {
                 return processor_->Process([&](void* buf, size_t sz) { return source_->Read(buf, sz); }, buffer, buffer_length);
+            }
+
+            [[nodiscard]] std::shared_ptr<IWaveSource> GetUpstreamWaveSource() override
+            {
+                return source_;
+            }
+
+            [[nodiscard]] std::shared_ptr<IWaveProcessor> GetAttachedProcessor() override
+            {
+                return processor_;
             }
         };
 

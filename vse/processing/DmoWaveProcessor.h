@@ -7,6 +7,8 @@
 #include <Windows.h>
 #include <mediaobj.h>
 
+#include <atomic>
+
 #include "../base/IWaveProcessor.h"
 #include "../base/win32/com_ptr.h"
 
@@ -51,6 +53,7 @@ namespace vse
         const PcmWaveFormat output_format_{};
         bool need_more_input_{true};
         bool end_of_input_{false};
+        std::atomic_flag continuity_{false};
 
     public:
         DmoWaveProcessor(IMediaObject* media_object, const PcmWaveFormat& input_format, const PcmWaveFormat& output_format);
@@ -61,6 +64,8 @@ namespace vse
         [[nodiscard]] size_t Process(
             size_t (*read_source)(void* context, void* buffer, size_t buffer_length), void* context,
             void* buffer, size_t buffer_length) override;
+
+        void Discontinuity() override;
     };
 
     static inline std::shared_ptr<IWaveProcessor> CreateDmoWaveProcessor(IMediaObject* media_object, const PcmWaveFormat& input_format, const PcmWaveFormat& output_format)

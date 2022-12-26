@@ -195,6 +195,9 @@ namespace vse
         size_t (*read_source)(void* context, void* buffer, size_t buffer_length), void* context,
         void* buffer, size_t buffer_length)
     {
+        if (!continuity_.test_and_set())
+            VSE_EXPECT_SUCCESS media_object_->Discontinuity(0);
+
         size_t rest = buffer_length;
         while (rest)
         {
@@ -246,5 +249,10 @@ namespace vse
         }
 
         return buffer_length - rest;
+    }
+
+    void DmoWaveProcessor::Discontinuity()
+    {
+        continuity_.clear();
     }
 }
