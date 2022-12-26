@@ -44,5 +44,8 @@ namespace vse::processing
 
     void ConvertCopy32bitTo24bit(void* __restrict dst_24bit_pcm, const S32* __restrict src, size_t count) noexcept;
 
+    void Mix(F32* __restrict dst, const F32* __restrict src, size_t count, float mix) noexcept;
+    void MixStereo(F32Stereo* __restrict dst, const F32Stereo* __restrict src, size_t count, float lch_mix, float rch_mix) noexcept;
+
     void ProcessHardLimit(F32* dst, const F32* src, size_t count, float multiplier, float limit) noexcept;
 }
