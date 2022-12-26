@@ -209,4 +209,25 @@ namespace vse::processing
             dst[i * 3 + 2] = static_cast<uint8_t>(src[i] >> 24);
         }
     }
+
+    void ProcessHardLimit(F32* dst, const F32* src, size_t count, float multiplier, float limit) noexcept
+    {
+#ifdef __AVX2__
+        const auto scalev = xmm::f32x8(multiplier);
+        const auto maxv = xmm::f32x8(+limit);
+        const auto minv = xmm::f32x8(-limit);
+        for (size_t i = 0; i < count / 8; i++)
+        {
+            xmm::store_u<xmm::vf32x8>(dst, xmm::clamp(xmm::load_u<xmm::vf32x8>(src) * scalev, minv, maxv));
+            src += 8;
+            dst += 8;
+        }
+        count %= 8;
+#endif
+
+        for (size_t i = 0; i < count; i++)
+        {
+            dst[i] = std::clamp<float>(src[i] * multiplier, -limit, limit);
+        }
+    }
 }

@@ -43,4 +43,6 @@ namespace vse::processing
     void ConvertCopy(F32* __restrict dst, const S32* __restrict src, size_t count) noexcept;
 
     void ConvertCopy32bitTo24bit(void* __restrict dst_24bit_pcm, const S32* __restrict src, size_t count) noexcept;
+
+    void ProcessHardLimit(F32* dst, const F32* src, size_t count, float multiplier, float limit) noexcept;
 }
