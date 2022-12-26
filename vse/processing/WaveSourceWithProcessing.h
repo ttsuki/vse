@@ -11,7 +11,14 @@
 
 namespace vse
 {
-    [[nodiscard]] std::shared_ptr<IWaveSource> CreateSourceWithProcessing(
+    class IWaveSourceWithProcessing : public IWaveSource
+    {
+    public:
+        [[nodiscard]] virtual std::shared_ptr<IWaveSource> GetUpstreamWaveSource() = 0;
+        [[nodiscard]] virtual std::shared_ptr<IWaveProcessor> GetAttachedProcessor() = 0;
+    };
+
+    [[nodiscard]] std::shared_ptr<IWaveSourceWithProcessing> CreateSourceWithProcessing(
         std::shared_ptr<IWaveSource> source,
         std::shared_ptr<IWaveProcessor> processor);
 }
