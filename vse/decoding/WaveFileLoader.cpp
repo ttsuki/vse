@@ -122,7 +122,7 @@ namespace vse
 
         std::shared_ptr<IWaveSource> pcm_stream{};
 
-        if (!pcm_stream && four_cc == 0x75B22630)
+        if (!pcm_stream && four_cc == 0x5367674f)
         {
             (void)file->Seek(0);
             pcm_stream = CreateWaveSourceOggVorbis(file);
