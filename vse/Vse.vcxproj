@@ -50,6 +50,7 @@
     <ClInclude Include="output\DirectSoundOutputDevice.h" />
     <ClInclude Include="output\WasapiOutputDevice.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="pipeline\SimpleVoice.h" />
     <ClInclude Include="pipeline\SourceSwitcher.h" />
     <ClInclude Include="pipeline\StereoWaveMixer.h" />
     <ClInclude Include="pipeline\VolumeCalculation.h" />
@@ -75,6 +76,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="pipeline\SimpleVoice.cpp" />
     <ClCompile Include="pipeline\SourceSwitcher.cpp" />
     <ClCompile Include="pipeline\StereoWaveMixer.cpp" />
     <ClCompile Include="processing\DirectSoundAudioEffectDsp.cpp" />
