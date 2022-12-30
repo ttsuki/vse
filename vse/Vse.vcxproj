@@ -30,7 +30,6 @@
     <ClInclude Include="base\win32\com_base.h" />
     <ClInclude Include="base\win32\com_ptr.h" />
     <ClInclude Include="base\win32\com_task_mem_ptr.h" />
-    <ClInclude Include="base\win32\com_thread.h" />
     <ClInclude Include="base\win32\debug.h" />
     <ClInclude Include="base\win32\event.h" />
     <ClInclude Include="base\win32\registry.h" />
