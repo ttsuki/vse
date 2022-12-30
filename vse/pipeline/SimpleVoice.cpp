@@ -5,7 +5,7 @@
 #include "SimpleVoice.h"
 
 #include "../base/xtl/xtl_spin_lock_mutex.h"
-#include "../decoding/WaveFileLoader.h"
+#include "../loader/WaveFileLoader.h"
 #include "../processing/WaveFormatConverter.h"
 #include "VolumeCalculation.h"
 

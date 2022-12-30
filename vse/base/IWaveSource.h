@@ -72,5 +72,8 @@ namespace vse
 
         /// Gets the total sample count in bytes.
         [[nodiscard]] virtual size_t Resize(size_t length) = 0;
+
+        /// Gets the total sample count in samples.
+        [[nodiscard]] virtual size_t GetTotalSampleCount() const { return Size() / GetFormat().BlockAlign(); }
     };
 }

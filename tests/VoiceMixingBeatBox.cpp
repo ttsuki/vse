@@ -10,7 +10,7 @@
 #include "../vse/output/AudioRenderingThread.h"
 #include "../vse/output/WasapiOutputDevice.h"
 
-#include "../vse/decoding/WaveFileLoader.h"
+#include "../vse/loader/WaveFileLoader.h"
 #include "../vse/processing/WaveFormatConverter.h"
 #include "../vse/processing/WaveSourceWithProcessing.h"
 #include "../vse/processing/DirectSoundAudioEffectDsp.h"
@@ -44,9 +44,9 @@ int wmain(int argc, const wchar_t* argv[])
         // Load file
         std::clog << "Loading wave files... \n";
         auto file_format_pcm = vse::PcmWaveFormat(vse::SampleType::S16, device_format_pcm.channels_, device_format_pcm.frequency_);
-        auto ogg36 = vse::CreateVoice(vse::ReadOutToMemory(vse::CreateWaveSourceForFile(wave_files::Open_36_ogg(), file_format_pcm)), mixer);
-        auto ogg40 = vse::CreateVoice(vse::ReadOutToMemory(vse::CreateWaveSourceForFile(wave_files::Open_40_ogg(), file_format_pcm)), mixer);
-        auto ogg42 = vse::CreateVoice(vse::ReadOutToMemory(vse::CreateWaveSourceForFile(wave_files::Open_42_ogg(), file_format_pcm)), mixer);
+        auto ogg36 = vse::CreateVoice(vse::LoadAudioFile(wave_files::Open_36_ogg(), file_format_pcm), mixer);
+        auto ogg40 = vse::CreateVoice(vse::LoadAudioFile(wave_files::Open_40_ogg(), file_format_pcm), mixer);
+        auto ogg42 = vse::CreateVoice(vse::LoadAudioFile(wave_files::Open_42_ogg(), file_format_pcm), mixer);
         std::clog << "key[1] ogg36: " << ogg36->GetUpstreamBuffer()->Size() << " bytes\n";
         std::clog << "key[2] ogg40: " << ogg40->GetUpstreamBuffer()->Size() << " bytes\n";
         std::clog << "key[3] ogg42: " << ogg42->GetUpstreamBuffer()->Size() << " bytes\n";

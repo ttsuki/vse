@@ -25,6 +25,7 @@
     <ClCompile Include="base\IWaveSource.h" />
     <ClCompile Include="base\IWaveProcessor.h" />
     <ClCompile Include="base\IByteStream.h" />
+    <ClInclude Include="base\RandomAccessWaveBuffer.h" />
     <ClInclude Include="base\WaveFormat.h" />
     <ClInclude Include="base\win32\com_base.h" />
     <ClInclude Include="base\win32\com_ptr.h" />
@@ -44,7 +45,7 @@
     <ClInclude Include="base\xtl\xtl_stdc++.h" />
     <ClInclude Include="base\xtl\xtl_timestamp.h" />
     <ClInclude Include="base\xtl\xtl_temp_memory_buffer.h" />
-    <ClInclude Include="decoding\WaveFileLoader.h" />
+    <ClInclude Include="loader\WaveFileLoader.h" />
     <ClCompile Include="output\IOutputDevice.h" />
     <ClInclude Include="output\AudioRenderingThread.h" />
     <ClInclude Include="output\DirectSoundOutputDevice.h" />
@@ -63,10 +64,11 @@
     <ClInclude Include="processing\WaveSourceWithProcessing.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="base\RandomAccessWaveBuffer.cpp" />
     <ClCompile Include="base\WaveFormat.cpp" />
-    <ClCompile Include="decoding\WaveFileLoader.cpp" />
-    <ClCompile Include="decoding\WaveSourceOggVorbis.cpp" />
-    <ClCompile Include="decoding\WaveSourceMediaFoundation.cpp" />
+    <ClCompile Include="loader\WaveFileLoader.cpp" />
+    <ClCompile Include="loader\WaveSourceOggVorbis.cpp" />
+    <ClCompile Include="loader\WaveSourceMediaFoundation.cpp" />
     <ClCompile Include="output\AudioRenderingThread.cpp" />
     <ClCompile Include="output\DirectSoundOutputDevice.cpp" />
     <ClCompile Include="output\WasapiOutputDevice.cpp" />

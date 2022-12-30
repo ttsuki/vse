@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../vse/decoding/WaveFileLoader.h"
+#include "../../vse/loader/WaveFileLoader.h"
 
 namespace wave_files
 {

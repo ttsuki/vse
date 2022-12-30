@@ -5,9 +5,11 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 
 #include "../base/WaveFormat.h"
 #include "../base/IWaveSource.h"
+#include "../base/RandomAccessWaveBuffer.h"
 #include "./StereoWaveMixer.h"
 
 namespace vse
@@ -45,4 +47,13 @@ namespace vse
     std::shared_ptr<SimpleVoice> CreateVoice(
         std::shared_ptr<IRandomAccessWaveBuffer> source_buffer,
         std::shared_ptr<IStereoWaveMixer> target_mixer);
+
+    static inline std::shared_ptr<SimpleVoice> CreateVoice(
+        std::shared_ptr<IWaveSource> source,
+        std::shared_ptr<IStereoWaveMixer> target_mixer)
+    {
+        // copy to memory
+        return CreateVoice(ReadOutToMemory(std::move(source)), std::move(target_mixer));
+    }
+
 }
