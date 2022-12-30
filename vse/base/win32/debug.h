@@ -29,6 +29,7 @@ namespace vse::debug_helper
 #ifndef NDEBUG
 #define VSE_DEBUG_LOG(PREFIX) ::vse::xtl::make_stream_with_prefix(&::OutputDebugStringA, "[" + ::vse::xtl::timestamp::now().to_localtime_string() + ("] " PREFIX))
 #define VSE_EXPECT_SUCCESS (::vse::debug_helper::make_percent_operator_redirection<::HRESULT>([](::HRESULT r) { if (FAILED(r)) { VSE_DEBUG_LOG("VSE_EXPECT_SUCCESS FAILED! at ") << __FILE__ << ":" << __LINE__ << " HRESULT=0x" << ::std::hex << ::std::setw(8) << r ; if (::IsDebuggerPresent()) { ::DebugBreak(); } } }))%
+#define VSE_DEBUG_BREAK() (::IsDebuggerPresent() ? ::DebugBreak() : void(0))
 #else
 
 namespace vse::xtl
@@ -39,4 +40,5 @@ namespace vse::xtl
 
 #define VSE_DEBUG_LOG(PREFIX) (::vse::xtl::null_ostream{})
 #define VSE_EXPECT_SUCCESS
+#define VSE_DEBUG_BREAK() void(0)
 #endif
