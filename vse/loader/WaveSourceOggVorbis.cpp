@@ -35,7 +35,7 @@ namespace vse
                     case SEEK_END: return (void)file->Seek(file->Size() + offset);
                     default: return (void)file->Tell();
                     }
-                }(offset, whence);
+                }(static_cast<ptrdiff_t>(offset), whence);
                 return 0;
             },
 

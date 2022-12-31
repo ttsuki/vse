@@ -37,17 +37,17 @@ namespace vse
             {
                 stream_.clear();
                 stream_.read(static_cast<char*>(buffer), buffer_length);
-                return stream_.gcount();
+                return static_cast<size_t>(stream_.gcount());
             }
 
             [[nodiscard]] size_t Size() const override { return size_; }
-            [[nodiscard]] size_t Tell() const override { return stream_.tellg(); }
-            [[nodiscard]] size_t Seek(size_t new_position) override { return Seek(new_position, std::ios::beg); }
+            [[nodiscard]] size_t Tell() const override { return static_cast<size_t>(stream_.tellg()); }
+            [[nodiscard]] size_t Seek(size_t new_position) override { return Seek(static_cast<ptrdiff_t>(new_position), std::ios::beg); }
 
             [[nodiscard]] size_t Seek(ptrdiff_t new_position, int whence) override
             {
                 stream_.clear();
-                return stream_.seekg(new_position, whence).tellg();
+                return static_cast<size_t>(stream_.seekg(new_position, whence).tellg());
             }
         };
 
