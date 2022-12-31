@@ -51,14 +51,17 @@ namespace vse
         bool Open(AUDCLNT_SHAREMODE deviceMode, const WAVEFORMATEXTENSIBLE& format)
         {
             // Create IAudioClient instance.
+            DEBUG_LOG << "Creating IAudioClient instance....";
             win32::com_ptr<IAudioClient> audio_client{};
             {
+                DEBUG_LOG << "  enumerator = CoCreateInstance(IMMDeviceEnumerator)...";
                 win32::com_ptr<IMMDeviceEnumerator> enumerator{};
                 win32::com_ptr<IMMDevice> device{};
                 EXPECT_SUCCESS ::CoCreateInstance(
                     __uuidof(MMDeviceEnumerator), nullptr, CLSCTX_ALL,
                     __uuidof(IMMDeviceEnumerator), enumerator.put_void());
 
+                DEBUG_LOG << "  device = enumerator->GetDefaultAudioEndpoint...";
                 if (HRESULT hr = EXPECT_SUCCESS enumerator->GetDefaultAudioEndpoint(eRender, eConsole, device.put());
                     FAILED(hr) || !device)
                 {
@@ -66,29 +69,33 @@ namespace vse
                     return false;
                 }
 
+                DEBUG_LOG << "  device->Activate...";
                 if (HRESULT hr = EXPECT_SUCCESS device->Activate(__uuidof(IAudioClient), CLSCTX_ALL, NULL, audio_client.put_void());
                     FAILED(hr) || !audio_client)
                 {
                     DEBUG_LOG << "Failed to open device. : Failed to Actiave AudioClient. HRESULT=0x" << std::hex << std::setfill('0') << std::setw(8) << hr;
                     return false;
                 }
+                DEBUG_LOG << "IAudioClient is ready.";
             }
 
             // GetDevicePeriod.
+            DEBUG_LOG << "GetDevicePeriod:";
             REFERENCE_TIME default_device_period = 0;
             REFERENCE_TIME minimum_device_period = 0;
             EXPECT_SUCCESS audio_client->GetDevicePeriod(&default_device_period, &minimum_device_period);
-            DEBUG_LOG << "MinimumDevicePeriod: " << (static_cast<double>(minimum_device_period) / 10000.0) << "ms.";
-            DEBUG_LOG << "DefaultDevicePeriod: " << (static_cast<double>(default_device_period) / 10000.0) << "ms.";
+            DEBUG_LOG << "  MinimumDevicePeriod: " << (static_cast<double>(minimum_device_period) / 10000.0) << "ms.";
+            DEBUG_LOG << "  DefaultDevicePeriod: " << (static_cast<double>(default_device_period) / 10000.0) << "ms.";
 
             WAVEFORMATEXTENSIBLE device_format{};
 
             // Get default device format
+            DEBUG_LOG << "Get default device format:";
             win32::com_task_mem_ptr<WAVEFORMATEX> default_device_format{};
             {
                 EXPECT_SUCCESS audio_client->GetMixFormat(default_device_format.put());
                 device_format_ = PcmWaveFormat::Parse(default_device_format.get());
-                DEBUG_LOG << "DefaultDeviceFormat: " << ToString(default_device_format.get());
+                DEBUG_LOG << "  DefaultDeviceFormat: " << ToString(default_device_format.get());
 
                 if (default_device_format->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
                 {
@@ -159,9 +166,8 @@ namespace vse
                     }
                     else
                     {
-                        DEBUG_LOG << "Using devicePeriod: " << (static_cast<double>(minimumPeriod) / device_format.Format.nSamplesPerSec) * 1000.0 << "ms.";
+                        DEBUG_LOG << "Using DevicePeriod: " << (static_cast<double>(minimumPeriod) / device_format.Format.nSamplesPerSec) * 1000.0 << "ms.";
                         DEBUG_LOG << "InitializeSharedAudioStream @ " << ToString(device_format) << ".";
-
                         if (initialization_result = audio_client3->InitializeSharedAudioStream(
                                 AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
                                 minimumPeriod,
@@ -169,7 +175,7 @@ namespace vse
                                 nullptr);
                             FAILED(initialization_result))
                         {
-                            DEBUG_LOG << "Failed to InitializeSharedAudioStream.HRESULT = 0x" << std::hex << std::setfill('0') << std::setw(8) << initialization_result;
+                            DEBUG_LOG << "Failed to InitializeSharedAudioStream. HRESULT = 0x" << std::hex << std::setfill('0') << std::setw(8) << initialization_result;
                             DEBUG_LOG << "Falling back to default initialization...";
                         }
                     }
@@ -252,6 +258,7 @@ namespace vse
             audio_client_ = std::move(audio_client);
             audio_render_client_ = std::move(audio_reder_client);
 
+            DEBUG_LOG << "WasapiOutputDevice READY.";
             return true;
         }
 
