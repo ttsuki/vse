@@ -67,9 +67,9 @@ namespace vse::xtl
             const size_t size = stream_->size();
             switch (whence)
             {
-            case std::ios_base::beg: return cursor_ = std::clamp<size_t>(offset, 0, size);
-            case std::ios_base::cur: return cursor_ = std::clamp<size_t>(cursor_ + offset, 0, size);
-            case std::ios_base::end: return cursor_ = std::clamp<size_t>(size + offset, 0, size);
+            case std::ios_base::beg: return cursor_ = 0 + offset;
+            case std::ios_base::cur: return cursor_ = cursor_ + offset;
+            case std::ios_base::end: return cursor_ = size + offset;
             default: return cursor_;
             }
         }
@@ -110,9 +110,9 @@ namespace vse::xtl
             const size_t size = stream_->size();
             switch (whence)
             {
-            case std::ios_base::beg: return cursor_ = std::clamp<size_t>(offset, 0, size);
-            case std::ios_base::cur: return cursor_ = std::clamp<size_t>(cursor_ + offset, 0, size());
-            case std::ios_base::end: return cursor_ = std::clamp<size_t>(size + offset, 0, size);
+            case std::ios_base::beg: return cursor_ = 0 + offset;
+            case std::ios_base::cur: return cursor_ = cursor_ + offset;
+            case std::ios_base::end: return cursor_ = size + offset;
             default: return cursor_;
             }
         }
