@@ -1,6 +1,8 @@
 #include <Windows.h>
 #include <mmsystem.h>
 #include <mfapi.h>
+#include <io.h>
+#include <fcntl.h>
 
 #include <iostream>
 #include <sstream>
@@ -28,7 +30,10 @@
 #include "./utils/BmsFile.h"
 #include "./utils/BmsEvent.h"
 #include "./utils/BmsPlaybackContext.h"
+#include "./utils/Jcode.h"
+
 using namespace TTsukiGameSdk;
+using namespace Tsukikage::util;
 
 static char EMPTY_CHAR = '|';
 static char BAR_CHAR = '+';
@@ -92,6 +97,7 @@ int wmain(int argc, const wchar_t* argv[])
         auto loading_start_timestamp = std::chrono::high_resolution_clock::now();
         std::clog << "Loading sequence...\n";
         bms::BmsFile source_file;
+        jcode::encoding source_encoding{};
         bms::BmsEventList event_list;
         {
             std::filesystem::path BmsFilePath = argv[1];
@@ -99,11 +105,21 @@ int wmain(int argc, const wchar_t* argv[])
             auto source_stream = vse::LoadFile(BmsFilePath);
             std::string source_code(source_stream->Size(), '\0');
             (void)source_stream->Read(source_code.data(), source_code.size());
+            source_encoding = jcode::guess_encoding(source_code);
 
+            std::stringstream parser_log;
             auto null_out = vse::xtl::o_null_stream{};
-            auto clog_out = vse::xtl::make_stream_with_prefix([](auto&& line) { std::clog << line; }, std::string("  "));
+            auto clog_out = vse::xtl::make_stream_with_prefix([&](const char* line) { parser_log << line; }, std::string("  "));
             source_file = bms::BmsFile::Parse(source_code, random_seed, clog_out, clog_out, null_out);
             event_list = BuildEventList(source_file, clog_out, clog_out, null_out);
+
+            {
+                std::wclog << std::flush;
+                int old_mode = _setmode(_fileno(stderr), _O_WTEXT);
+                std::wclog << jcode::convert_to_wstring(parser_log.str(), source_encoding) << std::flush;
+                _setmode(_fileno(stderr), old_mode);
+            }
+
             std::clog << "Loaded." << " events=" << event_list.size() << "." << " time=" << event_list.back().Timing.count() << "s." << "\n";
         }
 
@@ -118,7 +134,7 @@ int wmain(int argc, const wchar_t* argv[])
                 if (!wav_file_name.empty() && loading.count(wav_file_name) == 0)
                     loading[wav_file_name] = std::async(std::launch::async, [&]
                     {
-                        auto path = DirectoryPath / std::filesystem::path(wav_file_name);
+                        auto path = DirectoryPath / std::filesystem::path(jcode::convert_to_wstring(wav_file_name, source_encoding));
                         if (!exists(path)) path = path.replace_extension("wav");
                         if (!exists(path)) path = path.replace_extension("ogg");
                         if (!exists(path)) path = path.replace_extension("mp3");
@@ -139,7 +155,17 @@ int wmain(int argc, const wchar_t* argv[])
                     }
                     catch (const std::runtime_error& e)
                     {
-                        std::clog << "  Failed to load wave file: " << wav_file_name << ": " << e.what() << std::endl;
+                        auto path = std::filesystem::path();
+                        std::clog << "  Failed to load wave file: " << std::flush;
+
+                        {
+                            std::wclog << std::flush;
+                            int old_mode = _setmode(_fileno(stderr), _O_WTEXT);
+                            std::wclog << jcode::convert_to_wstring(wav_file_name, source_encoding) << std::flush;
+                            _setmode(_fileno(stderr), old_mode);
+                        }
+
+                        std::clog << ": " << e.what() << std::endl;
                     }
                 }
             }

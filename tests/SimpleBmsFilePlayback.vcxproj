@@ -123,6 +123,9 @@
     <ClCompile Include="utils\BmsFile.h" />
     <ClCompile Include="utils\BmsPlaybackContext.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="utils\Jcode.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
