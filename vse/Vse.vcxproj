@@ -37,6 +37,7 @@
     <ClInclude Include="base\win32\memory.h" />
     <ClInclude Include="base\win32\thread.h" />
     <ClInclude Include="base\xtl\xtl_fixed_memory_stream.h" />
+    <ClInclude Include="base\xtl\xtl_manual_reset_event.h" />
     <ClInclude Include="base\xtl\xtl_memory_stream.h" />
     <ClInclude Include="base\xtl\xtl_ostream.h" />
     <ClInclude Include="base\xtl\xtl_rastream.h" />
