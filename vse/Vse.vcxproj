@@ -45,6 +45,7 @@
     <ClInclude Include="base\xtl\xtl_stdc++.h" />
     <ClInclude Include="base\xtl\xtl_timestamp.h" />
     <ClInclude Include="base\xtl\xtl_temp_memory_buffer.h" />
+    <ClInclude Include="base\xtl\xtl_single_thread.h" />
     <ClInclude Include="loader\WaveFileLoader.h" />
     <ClCompile Include="output\IOutputDevice.h" />
     <ClInclude Include="output\AudioRenderingThread.h" />
