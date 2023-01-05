@@ -8,6 +8,10 @@
 #include <mmdeviceapi.h>
 #include <Audioclient.h>
 
+#include <memory>
+#include <chrono>
+#include <optional>
+
 #include "../base/win32/debug.h"
 #include "../base/win32/event.h"
 #include "../base/win32/com_ptr.h"
@@ -35,20 +39,26 @@ namespace vse
 
         bool Open() override
         {
-            return Open(AUDCLNT_SHAREMODE_SHARED, {});
+            return Open(AUDCLNT_SHAREMODE_SHARED, {}, std::nullopt);
         }
 
         bool Open(const WAVEFORMATEXTENSIBLE& format) override
         {
-            return Open(AUDCLNT_SHAREMODE_SHARED, format);
+            return Open(AUDCLNT_SHAREMODE_SHARED, format, std::nullopt);
         }
 
         bool OpenExclusive(const WAVEFORMATEXTENSIBLE& format) override
         {
-            return Open(AUDCLNT_SHAREMODE_EXCLUSIVE, format);
+            return Open(AUDCLNT_SHAREMODE_EXCLUSIVE, format, std::nullopt);
         }
 
-        bool Open(AUDCLNT_SHAREMODE deviceMode, const WAVEFORMATEXTENSIBLE& format)
+        bool OpenExclusive(const WAVEFORMATEXTENSIBLE& format, std::chrono::microseconds device_period) override
+        {
+            using REFERENCE_TIME_duration = std::chrono::duration<REFERENCE_TIME, std::ratio<1, 10000000>>;
+            return Open(AUDCLNT_SHAREMODE_EXCLUSIVE, format, std::chrono::duration_cast<REFERENCE_TIME_duration>(device_period).count());
+        }
+
+        bool Open(AUDCLNT_SHAREMODE deviceMode, const WAVEFORMATEXTENSIBLE& format, std::optional<REFERENCE_TIME> period)
         {
             // Create IAudioClient instance.
             DEBUG_LOG << "Creating IAudioClient instance....";
@@ -198,7 +208,7 @@ namespace vse
             {
                 DEBUG_LOG << "Initializing " << (deviceMode == AUDCLNT_SHAREMODE_EXCLUSIVE ? "Exclusive" : "Shared") << " mode @ " << ToString(device_format) << "...";
 
-                REFERENCE_TIME device_period = deviceMode == AUDCLNT_SHAREMODE_EXCLUSIVE ? minimum_device_period : default_device_period;
+                REFERENCE_TIME device_period = period ? *period : deviceMode == AUDCLNT_SHAREMODE_EXCLUSIVE ? minimum_device_period : default_device_period;
                 DEBUG_LOG << "Using DevicePeriod: " << static_cast<double>(device_period) / 10000.0 << "ms.";
 
                 initialization_result = audio_client->Initialize(

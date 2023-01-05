@@ -6,6 +6,7 @@
 
 #include "IOutputDevice.h"
 #include <memory>
+#include <chrono>
 
 namespace vse
 {
@@ -26,6 +27,11 @@ namespace vse
         /// If the device does not support the format, the function will fail.
         [[nodiscard]]
         virtual bool OpenExclusive(const WAVEFORMATEXTENSIBLE& format) = 0;
+
+        /// Open the device with WASAPI Exclusive mode.
+        /// If the device does not support the format, the function will fail.
+        [[nodiscard]]
+        virtual bool OpenExclusive(const WAVEFORMATEXTENSIBLE& format, std::chrono::microseconds device_period) = 0;
     };
 
     std::shared_ptr<WasapiOutputDevice> CreateWasapiOutputDevice();
