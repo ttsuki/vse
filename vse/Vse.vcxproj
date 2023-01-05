@@ -48,9 +48,15 @@
     <ClInclude Include="base\xtl\xtl_single_thread.h" />
     <ClInclude Include="loader\WaveFileLoader.h" />
     <ClCompile Include="output\IOutputDevice.h" />
+    <ClInclude Include="output\AsioOutputDevice.h" />
     <ClInclude Include="output\AudioRenderingThread.h" />
     <ClInclude Include="output\DirectSoundOutputDevice.h" />
     <ClInclude Include="output\WasapiOutputDevice.h" />
+    <ClInclude Include="output\winasio\asio.h" />
+    <ClInclude Include="output\winasio\asio-data-transfering.h" />
+    <ClInclude Include="output\winasio\asio-callback-allocator.h" />
+    <ClInclude Include="output\winasio\asio-enumerator.h" />
+    <ClInclude Include="output\winasio\asio-host.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="pipeline\SimpleVoice.h" />
     <ClInclude Include="pipeline\SourceSwitcher.h" />
@@ -70,6 +76,7 @@
     <ClCompile Include="loader\WaveFileLoader.cpp" />
     <ClCompile Include="loader\WaveSourceOggVorbis.cpp" />
     <ClCompile Include="loader\WaveSourceMediaFoundation.cpp" />
+    <ClCompile Include="output\AsioOutputDevice.cpp" />
     <ClCompile Include="output\AudioRenderingThread.cpp" />
     <ClCompile Include="output\DirectSoundOutputDevice.cpp" />
     <ClCompile Include="output\WasapiOutputDevice.cpp" />
