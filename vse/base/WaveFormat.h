@@ -25,6 +25,7 @@ namespace vse
     {
         Unknown = 0,
         S16 = WaveFormatTag_Pcm << 16 | 16,
+        S24 = WaveFormatTag_Pcm << 16 | 24,
         S32 = WaveFormatTag_Pcm << 16 | 32,
         F32 = WaveFormatTag_IeeeFloat << 16 | 32,
     };

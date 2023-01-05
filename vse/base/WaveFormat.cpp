@@ -16,6 +16,7 @@ namespace vse
         {
             auto wfx = reinterpret_cast<const WAVEFORMATEXTENSIBLE*>(wf);
             if (wfx->SubFormat == MEDIASUBTYPE_PCM && wfx->Format.wBitsPerSample == 16) return {SampleType::S16, static_cast<SpeakerBit>(wfx->dwChannelMask), static_cast<int>(wfx->Format.nSamplesPerSec)};
+            if (wfx->SubFormat == MEDIASUBTYPE_PCM && wfx->Format.wBitsPerSample == 24) return {SampleType::S24, static_cast<SpeakerBit>(wfx->dwChannelMask), static_cast<int>(wfx->Format.nSamplesPerSec) };
             if (wfx->SubFormat == MEDIASUBTYPE_PCM && wfx->Format.wBitsPerSample == 32) return {SampleType::S32, static_cast<SpeakerBit>(wfx->dwChannelMask), static_cast<int>(wfx->Format.nSamplesPerSec)};
             if (wfx->SubFormat == MEDIASUBTYPE_IEEE_FLOAT && wfx->Format.wBitsPerSample == 32) return {SampleType::F32, static_cast<SpeakerBit>(wfx->dwChannelMask), static_cast<int>(wfx->Format.nSamplesPerSec)};
             return {SampleType::Unknown, static_cast<SpeakerBit>(wfx->dwChannelMask), static_cast<int>(wfx->Format.nSamplesPerSec)}; // not supported.
@@ -24,6 +25,7 @@ namespace vse
         if ((wf->wFormatTag == WAVE_FORMAT_PCM || wf->wFormatTag == WAVE_FORMAT_IEEE_FLOAT) && DefaultChannelMask(wf->nChannels) != SpeakerBit::None)
         {
             if (wf->wFormatTag == WAVE_FORMAT_PCM && wf->wBitsPerSample == 16) return {SampleType::S16, DefaultChannelMask(wf->nChannels), static_cast<int>(wf->nSamplesPerSec)};
+            if (wf->wFormatTag == WAVE_FORMAT_PCM && wf->wBitsPerSample == 24) return {SampleType::S24, DefaultChannelMask(wf->nChannels), static_cast<int>(wf->nSamplesPerSec) };
             if (wf->wFormatTag == WAVE_FORMAT_PCM && wf->wBitsPerSample == 32) return {SampleType::S32, DefaultChannelMask(wf->nChannels), static_cast<int>(wf->nSamplesPerSec)};
             if (wf->wFormatTag == WAVE_FORMAT_IEEE_FLOAT && wf->wBitsPerSample == 32) return {SampleType::F32, DefaultChannelMask(wf->nChannels), static_cast<int>(wf->nSamplesPerSec)};
         }

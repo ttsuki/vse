@@ -25,6 +25,17 @@ namespace vse
     using S32 = int32_t; ///< 32-bit signed integer sample
     using F32 = float;   ///< 32-bit floating-point sample
 
+    struct S24
+    {
+        uint8_t b0;
+        uint8_t b1;
+        int8_t b2;
+
+        S24() = default;
+        constexpr explicit S24(S32 s) noexcept : b0{static_cast<uint8_t>(s)}, b1{static_cast<uint8_t>(s >> 8)}, b2{static_cast<int8_t>(s >> 16)} {}
+        constexpr operator S32() const noexcept { return b2 << 16 | b1 << 8 | b0; }
+    };
+
     template <class T>
     struct Stereo
     {
@@ -32,6 +43,12 @@ namespace vse
     };
 
     using S16Stereo = Stereo<S16>; ///< 16-bit signed integer stereo sample
+    using S24Stereo = Stereo<S24>; ///< 24-bit signed integer stereo sample
     using S32Stereo = Stereo<S32>; ///< 32-bit signed integer stereo sample
     using F32Stereo = Stereo<F32>; ///< 32-bit floating-point stereo sample
+
+    static_assert(std::is_pod_v<S24>);         // type requirement check
+    static_assert(sizeof(S24) == 3);           // type requirement check
+    static_assert(sizeof(S24Stereo[2]) == 12); // type requirement check
+    static_assert(alignof(S24Stereo[2]) == 1); // type requirement check
 }

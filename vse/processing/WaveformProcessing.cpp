@@ -40,6 +40,38 @@ namespace vse::processing
         }
     }
 
+    void ConvertCopy(S16* __restrict dst, const S24* __restrict src, size_t count) noexcept
+    {
+#ifdef __AVX2__
+        for (size_t i = 0; i < count / 16; i++)
+        {
+            auto x0 = xmm::load_u<xmm::vu8x16>(reinterpret_cast<const std::byte*>(src) + 0);
+            auto x1 = xmm::load_u<xmm::vu8x16>(reinterpret_cast<const std::byte*>(src) + 16);
+            auto x2 = xmm::load_u<xmm::vu8x16>(reinterpret_cast<const std::byte*>(src) + 32);
+
+            auto y0 = xmm::byte_align_r_128<6>(
+                xmm::byte_shuffle_128(x0, xmm::i8x16(-1, -1, -1, -1, -1, -1, 1, 2, 4, 5, 7, 8, 10, 11, 13, 14)),
+                xmm::byte_shuffle_128(x1, xmm::i8x16(0, 1, 3, 4, 6, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)));
+
+            auto y1 = xmm::byte_align_r_128<11>(
+                xmm::byte_shuffle_128(x1, xmm::i8x16(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 9, 10, 12, 13, 15)),
+                xmm::byte_shuffle_128(x2, xmm::i8x16(0, 2, 3, 5, 6, 8, 9, 11, 12, 14, 15, -1, -1, -1, -1, -1)));
+
+            xmm::store_u<xmm::vu8x16>(reinterpret_cast<std::byte*>(dst) + 0, y0);
+            xmm::store_u<xmm::vu8x16>(reinterpret_cast<std::byte*>(dst) + 16, y1);
+
+            src += 16;
+            dst += 16;
+        }
+        count %= 16;
+#endif
+
+        for (size_t i = 0; i < count; i++)
+        {
+            dst[i] = static_cast<S16>(static_cast<S32>(src[i]) >> 8);
+        }
+    }
+
     void ConvertCopy(S16* __restrict dst, const F32* __restrict src, size_t count) noexcept
     {
         const float scale = 0x1p+15f; // = 1 << 15
@@ -72,6 +104,122 @@ namespace vse::processing
         }
     }
 
+    void ConvertCopy(S24* __restrict dst, const S16* __restrict src, size_t count) noexcept
+    {
+#ifdef __AVX2__
+        for (size_t i = 0; i < count / 16; i++)
+        {
+            auto x0 = xmm::load_u<xmm::vu8x16>(src + 0);
+            auto x1 = xmm::load_u<xmm::vu8x16>(src + 8);
+
+            auto y0 = xmm::byte_shuffle_128(x0, xmm::i8x16(-1, 0, 1, -1, 2, 3, -1, 4, 5, -1, 6, 7, -1, 8, 9, -1));
+            auto y1 = xmm::byte_shuffle_128(xmm::byte_align_r_128<8>(x0, x1), xmm::i8x16(2, 3, -1, 4, 5, -1, 6, 7, -1, 8, 9, -1, 10, 11, -1, 12));
+            auto y2 = xmm::byte_shuffle_128(x1, xmm::i8x16(5, -1, 6, 7, -1, 8, 9, -1, 10, 11, -1, 12, 13, -1, 14, 15));
+
+            xmm::store_u<xmm::vu8x16>(reinterpret_cast<std::byte*>(dst) + 0, y0);
+            xmm::store_u<xmm::vu8x16>(reinterpret_cast<std::byte*>(dst) + 16, y1);
+            xmm::store_u<xmm::vu8x16>(reinterpret_cast<std::byte*>(dst) + 32, y2);
+
+            src += 16;
+            dst += 16;
+        }
+        count %= 16;
+#endif
+
+        for (size_t i = 0; i < count; i++)
+        {
+            dst[i] = S24(src[i] << 8);
+        }
+    }
+
+    void ConvertCopy(S24* __restrict dst, const S32* __restrict src, size_t count) noexcept
+    {
+#ifdef __AVX2__
+        for (size_t i = 0; i < count / 16; i++)
+        {
+            auto x0 = xmm::load_u<xmm::vu8x16>(src + 0);
+            auto x1 = xmm::load_u<xmm::vu8x16>(src + 4);
+            auto x2 = xmm::load_u<xmm::vu8x16>(src + 8);
+            auto x3 = xmm::load_u<xmm::vu8x16>(src + 12);
+
+            auto t0 = xmm::byte_shuffle_128(xmm::reinterpret<xmm::vu8x16>(x0), xmm::i8x16(1, 2, 3, 5, 1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15));
+            auto t1 = xmm::byte_shuffle_128(xmm::reinterpret<xmm::vu8x16>(x1), xmm::i8x16(1, 2, 3, 5, 1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15));
+            auto t2 = xmm::byte_shuffle_128(xmm::reinterpret<xmm::vu8x16>(x2), xmm::i8x16(1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 11, 13, 14, 15));
+            auto t3 = xmm::byte_shuffle_128(xmm::reinterpret<xmm::vu8x16>(x3), xmm::i8x16(1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 11, 13, 14, 15));
+
+            auto y0 = xmm::byte_align_r_128<4>(t0, t1);
+            auto y1 = xmm::byte_align_r_128<8>(t1, t2);
+            auto y2 = xmm::byte_align_r_128<12>(t2, t3);
+
+            xmm::store_u<xmm::vu8x16>(reinterpret_cast<std::byte*>(dst) + 0, y0);
+            xmm::store_u<xmm::vu8x16>(reinterpret_cast<std::byte*>(dst) + 16, y1);
+            xmm::store_u<xmm::vu8x16>(reinterpret_cast<std::byte*>(dst) + 32, y2);
+
+            src += 16;
+            dst += 16;
+        }
+        count %= 16;
+#endif
+
+        for (size_t i = 0; i < count; i++)
+        {
+            dst[i] = S24(src[i] >> 8);
+        }
+    }
+
+    void ConvertCopy(S24* __restrict dst, const F32* __restrict src, size_t count) noexcept
+    {
+        const float scale = 0x1p23f; // = 1 << 23
+        const float maxi = std::nextafter(+scale, -1.0f);
+        const float mini = std::nextafter(-scale, +1.0f);
+
+#ifdef __AVX2__
+        const auto scalev = xmm::f32x4(0x1p31f);
+        const auto maxiv = xmm::f32x4(std::nextafter(+0x1p31f, -1.0f));
+        const auto miniv = xmm::f32x4(std::nextafter(-0x1p31f, +1.0f));
+
+        for (size_t i = 0; i < count / 16; i++)
+        {
+            auto x0 = xmm::load_u<xmm::vf32x4>(src + 0);
+            auto x1 = xmm::load_u<xmm::vf32x4>(src + 4);
+            auto x2 = xmm::load_u<xmm::vf32x4>(src + 8);
+            auto x3 = xmm::load_u<xmm::vf32x4>(src + 12);
+
+            auto t0 = xmm::clamp(x0 * scalev, miniv, maxiv);
+            auto t1 = xmm::clamp(x1 * scalev, miniv, maxiv);
+            auto t2 = xmm::clamp(x2 * scalev, miniv, maxiv);
+            auto t3 = xmm::clamp(x3 * scalev, miniv, maxiv);
+
+            auto u0 = xmm::convert_cast<xmm::vi32x4>(t0);
+            auto u1 = xmm::convert_cast<xmm::vi32x4>(t1);
+            auto u2 = xmm::convert_cast<xmm::vi32x4>(t2);
+            auto u3 = xmm::convert_cast<xmm::vi32x4>(t3);
+
+            auto w0 = xmm::byte_shuffle_128(xmm::reinterpret<xmm::vu8x16>(u0), xmm::i8x16(1, 2, 3, 5, 1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15));
+            auto w1 = xmm::byte_shuffle_128(xmm::reinterpret<xmm::vu8x16>(u1), xmm::i8x16(1, 2, 3, 5, 1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15));
+            auto w2 = xmm::byte_shuffle_128(xmm::reinterpret<xmm::vu8x16>(u2), xmm::i8x16(1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 11, 13, 14, 15));
+            auto w3 = xmm::byte_shuffle_128(xmm::reinterpret<xmm::vu8x16>(u3), xmm::i8x16(1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 11, 13, 14, 15));
+
+            auto y0 = xmm::byte_align_r_128<4>(w0, w1);
+            auto y1 = xmm::byte_align_r_128<8>(w1, w2);
+            auto y2 = xmm::byte_align_r_128<12>(w2, w3);
+
+            xmm::store_u<xmm::vu8x16>(reinterpret_cast<std::byte*>(dst) + 0, y0);
+            xmm::store_u<xmm::vu8x16>(reinterpret_cast<std::byte*>(dst) + 16, y1);
+            xmm::store_u<xmm::vu8x16>(reinterpret_cast<std::byte*>(dst) + 32, y2);
+
+            src += 16;
+            dst += 16;
+        }
+        count %= 16;
+#endif
+
+        for (size_t i = 0; i < count; i++)
+        {
+            dst[i] = S24(static_cast<S32>(std::clamp<float>(src[i] * scale, mini, maxi)));
+        }
+    }
+
     void ConvertCopy(S32* __restrict dst, const S16* __restrict src, size_t count) noexcept
     {
 #ifdef __AVX2__
@@ -92,6 +240,37 @@ namespace vse::processing
         for (size_t i = 0; i < count; i++)
         {
             dst[i] = static_cast<S32>(src[i]) << 16;
+        }
+    }
+
+    void ConvertCopy(S32* __restrict dst, const S24* __restrict src, size_t count) noexcept
+    {
+#ifdef __AVX2__
+        for (size_t i = 0; i < count / 16; i++)
+        {
+            auto x0 = xmm::load_u<xmm::vu8x16>(reinterpret_cast<const std::byte*>(src) + 0);
+            auto x1 = xmm::load_u<xmm::vu8x16>(reinterpret_cast<const std::byte*>(src) + 16);
+            auto x2 = xmm::load_u<xmm::vu8x16>(reinterpret_cast<const std::byte*>(src) + 32);
+
+            auto y0 = xmm::byte_shuffle_128(x0, xmm::i8x16(-1, 0, 1, 2, -1, 3, 4, 5, -1, 6, 7, 8, -1, 9, 10, 11));
+            auto y1 = xmm::byte_shuffle_128(xmm::byte_align_r_128<12>(x0, x1), xmm::i8x16(-1, 0, 1, 2, -1, 3, 4, 5, -1, 6, 7, 8, -1, 9, 10, 11));
+            auto y2 = xmm::byte_shuffle_128(xmm::byte_align_r_128<8>(x1, x2), xmm::i8x16(-1, 0, 1, 2, -1, 3, 4, 5, -1, 6, 7, 8, -1, 9, 10, 11));
+            auto y3 = xmm::byte_shuffle_128(xmm::byte_align_r_128<4>(x2, x2), xmm::i8x16(-1, 0, 1, 2, -1, 3, 4, 5, -1, 6, 7, 8, -1, 9, 10, 11));
+
+            xmm::store_u<xmm::vu8x16>(dst + 0, y0);
+            xmm::store_u<xmm::vu8x16>(dst + 4, y1);
+            xmm::store_u<xmm::vu8x16>(dst + 8, y2);
+            xmm::store_u<xmm::vu8x16>(dst + 12, y3);
+
+            src += 16;
+            dst += 16;
+        }
+        count %= 16;
+#endif
+
+        for (size_t i = 0; i < count; i++)
+        {
+            dst[i] = static_cast<S32>(src[i]) << 8;
         }
     }
 
@@ -151,6 +330,45 @@ namespace vse::processing
         }
     }
 
+    void ConvertCopy(F32* __restrict dst, const S24* __restrict src, size_t count) noexcept
+    {
+        const float scale = 0x1p-23f; // = 1 / (1 << 23)
+
+#ifdef __AVX2__
+        for (size_t i = 0; i < count / 16; i++)
+        {
+            const auto scalev = xmm::f32x4(0x1p-31f);
+            auto x0 = xmm::load_u<xmm::vu8x16>(reinterpret_cast<const std::byte*>(src) + 0);
+            auto x1 = xmm::load_u<xmm::vu8x16>(reinterpret_cast<const std::byte*>(src) + 16);
+            auto x2 = xmm::load_u<xmm::vu8x16>(reinterpret_cast<const std::byte*>(src) + 32);
+
+            auto t0 = xmm::byte_shuffle_128(x0, xmm::i8x16(-1, 0, 1, 2, -1, 3, 4, 5, -1, 6, 7, 8, -1, 9, 10, 11));
+            auto t1 = xmm::byte_shuffle_128(xmm::byte_align_r_128<12>(x0, x1), xmm::i8x16(-1, 0, 1, 2, -1, 3, 4, 5, -1, 6, 7, 8, -1, 9, 10, 11));
+            auto t2 = xmm::byte_shuffle_128(xmm::byte_align_r_128<8>(x1, x2), xmm::i8x16(-1, 0, 1, 2, -1, 3, 4, 5, -1, 6, 7, 8, -1, 9, 10, 11));
+            auto t3 = xmm::byte_shuffle_128(xmm::byte_align_r_128<4>(x2, x2), xmm::i8x16(-1, 0, 1, 2, -1, 3, 4, 5, -1, 6, 7, 8, -1, 9, 10, 11));
+
+            auto y0 = xmm::convert_cast<xmm::vf32x4>(xmm::reinterpret<xmm::vi32x4>(t0)) * scalev;
+            auto y1 = xmm::convert_cast<xmm::vf32x4>(xmm::reinterpret<xmm::vi32x4>(t1)) * scalev;
+            auto y2 = xmm::convert_cast<xmm::vf32x4>(xmm::reinterpret<xmm::vi32x4>(t2)) * scalev;
+            auto y3 = xmm::convert_cast<xmm::vf32x4>(xmm::reinterpret<xmm::vi32x4>(t3)) * scalev;
+
+            xmm::store_u<xmm::vf32x4>(dst + 0, y0);
+            xmm::store_u<xmm::vf32x4>(dst + 4, y1);
+            xmm::store_u<xmm::vf32x4>(dst + 8, y2);
+            xmm::store_u<xmm::vf32x4>(dst + 12, y3);
+
+            src += 16;
+            dst += 16;
+        }
+        count %= 16;
+#endif
+
+        for (size_t i = 0; i < count; i++)
+        {
+            dst[i] = static_cast<float>(static_cast<S32>(src[i])) * scale;
+        }
+    }
+
     void ConvertCopy(F32* __restrict dst, const S32* __restrict src, size_t count) noexcept
     {
         const float scale = 0x1p-31f; // = 1 / (1 << 31)
@@ -172,45 +390,6 @@ namespace vse::processing
         for (size_t i = 0; i < count; i++)
         {
             dst[i] = static_cast<float>(src[i]) * scale;
-        }
-    }
-
-    void ConvertCopy32bitTo24bit(void* __restrict dst_24bit, const S32* __restrict src, size_t count) noexcept
-    {
-        auto* dst = static_cast<uint8_t*>(dst_24bit);
-
-#ifdef __AVX2__
-        for (size_t i = 0; i < count / 16; i++)
-        {
-            auto x0 = xmm::load_u<xmm::vu8x16>(src + 0);
-            auto x1 = xmm::load_u<xmm::vu8x16>(src + 4);
-            auto x2 = xmm::load_u<xmm::vu8x16>(src + 8);
-            auto x3 = xmm::load_u<xmm::vu8x16>(src + 12);
-
-            x0 = xmm::byte_shuffle_128(xmm::reinterpret<xmm::vu8x16>(x0), xmm::i8x16(1, 2, 3, 5, 1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15));
-            x1 = xmm::byte_shuffle_128(xmm::reinterpret<xmm::vu8x16>(x1), xmm::i8x16(1, 2, 3, 5, 1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15));
-            x2 = xmm::byte_shuffle_128(xmm::reinterpret<xmm::vu8x16>(x2), xmm::i8x16(1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 11, 13, 14, 15));
-            x3 = xmm::byte_shuffle_128(xmm::reinterpret<xmm::vu8x16>(x3), xmm::i8x16(1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 11, 13, 14, 15));
-
-            auto y0 = xmm::byte_align_r_128<4>(x0, x1);
-            auto y1 = xmm::byte_align_r_128<8>(x1, x2);
-            auto y2 = xmm::byte_align_r_128<12>(x2, x3);
-
-            xmm::store_u<xmm::vu8x16>(dst + 0, y0);
-            xmm::store_u<xmm::vu8x16>(dst + 16, y1);
-            xmm::store_u<xmm::vu8x16>(dst + 32, y2);
-
-            src += 16;
-            dst += 3 * 16;
-        }
-        count %= 16;
-#endif
-
-        for (size_t i = 0; i < count; i++)
-        {
-            dst[i * 3 + 0] = static_cast<uint8_t>(src[i] >> 8);
-            dst[i * 3 + 1] = static_cast<uint8_t>(src[i] >> 16);
-            dst[i * 3 + 2] = static_cast<uint8_t>(src[i] >> 24);
         }
     }
 

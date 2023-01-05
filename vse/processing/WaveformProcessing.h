@@ -32,17 +32,23 @@ namespace vse::processing
         for (size_t i = 0; i < count; i++) d[i * dst_stride] = s[i];
     }
 
-    static inline void ConvertCopy(S16* __restrict dst, const S16* __restrict src, size_t count) noexcept { return Copy<S16>(dst, src, count); }
-    static inline void ConvertCopy(S32* __restrict dst, const S32* __restrict src, size_t count) noexcept { return Copy<S32>(dst, src, count); }
-    static inline void ConvertCopy(F32* __restrict dst, const F32* __restrict src, size_t count) noexcept { return Copy<F32>(dst, src, count); }
+    inline void ConvertCopy(S16* __restrict dst, const S16* __restrict src, size_t count) noexcept { return Copy<S16>(dst, src, count); }
+    inline void ConvertCopy(S24* __restrict dst, const S24* __restrict src, size_t count) noexcept { return Copy<S24>(dst, src, count); }
+    inline void ConvertCopy(S32* __restrict dst, const S32* __restrict src, size_t count) noexcept { return Copy<S32>(dst, src, count); }
+    inline void ConvertCopy(F32* __restrict dst, const F32* __restrict src, size_t count) noexcept { return Copy<F32>(dst, src, count); }
+    void ConvertCopy(S16* __restrict dst, const S24* __restrict src, size_t count) noexcept;
     void ConvertCopy(S16* __restrict dst, const S32* __restrict src, size_t count) noexcept;
     void ConvertCopy(S16* __restrict dst, const F32* __restrict src, size_t count) noexcept;
+    void ConvertCopy(S24* __restrict dst, const S16* __restrict src, size_t count) noexcept;
+    void ConvertCopy(S24* __restrict dst, const S32* __restrict src, size_t count) noexcept;
+    void ConvertCopy(S24* __restrict dst, const F32* __restrict src, size_t count) noexcept;
     void ConvertCopy(S32* __restrict dst, const S16* __restrict src, size_t count) noexcept;
+    void ConvertCopy(S32* __restrict dst, const S24* __restrict src, size_t count) noexcept;
     void ConvertCopy(S32* __restrict dst, const F32* __restrict src, size_t count) noexcept;
     void ConvertCopy(F32* __restrict dst, const S16* __restrict src, size_t count) noexcept;
+    void ConvertCopy(F32* __restrict dst, const S24* __restrict src, size_t count) noexcept;
     void ConvertCopy(F32* __restrict dst, const S32* __restrict src, size_t count) noexcept;
 
-    void ConvertCopy32bitTo24bit(void* __restrict dst_24bit_pcm, const S32* __restrict src, size_t count) noexcept;
 
     void Mix(F32* __restrict dst, const F32* __restrict src, size_t count, float mix) noexcept;
     void MixStereo(F32Stereo* __restrict dst, const F32Stereo* __restrict src, size_t count, float lch_mix, float rch_mix) noexcept;
