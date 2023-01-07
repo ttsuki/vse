@@ -46,9 +46,9 @@ int wmain(int argc, const wchar_t* argv[])
         for (size_t i = 0; i < all_asio_devices.size(); ++i)
         {
             auto&& desc = all_asio_devices[i];
-            std::wclog << L"  - driver[" << std::to_wstring(i) << "] = " << desc.DeviceName << " " << vse::win32::to_wstring(desc.Id) << L"\n";
+            std::clog << "  - driver[" << std::to_string(i) << "] = " << desc.DeviceName << " " << vse::win32::to_string(desc.Id) << "\n";
         }
-        std::wclog << L"---\n" << std::flush;
+        std::clog << "---\n" << std::flush;
 
         size_t device_index = 0;
         std::wcout << L"Select driver index: " << std::flush;
@@ -72,7 +72,7 @@ int wmain(int argc, const wchar_t* argv[])
     }
 
     {
-        std::wclog << L"Loading device driver... " << device_desc.DeviceName << L"\n";
+        std::clog << "Loading device driver... " << device_desc.DeviceName << "\n";
         auto device = vse::CreateAsioOutputDevice(device_desc.Id);
 
         std::clog << "Opening control panel...\n";
