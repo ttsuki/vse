@@ -20,11 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base\arkxmm.h" />
-    <ClCompile Include="base\CommonTypes.h" />
-    <ClCompile Include="base\Interface.h" />
-    <ClCompile Include="base\IWaveSource.h" />
-    <ClCompile Include="base\IWaveProcessor.h" />
-    <ClCompile Include="base\IByteStream.h" />
+    <ClInclude Include="base\CommonTypes.h" />
+    <ClInclude Include="base\Interface.h" />
+    <ClInclude Include="base\IWaveSource.h" />
+    <ClInclude Include="base\IWaveProcessor.h" />
+    <ClInclude Include="base\IByteStream.h" />
     <ClInclude Include="base\RandomAccessWaveBuffer.h" />
     <ClInclude Include="base\WaveFormat.h" />
     <ClInclude Include="base\win32\com_base.h" />
@@ -47,7 +47,7 @@
     <ClInclude Include="base\xtl\xtl_temp_memory_buffer.h" />
     <ClInclude Include="base\xtl\xtl_single_thread.h" />
     <ClInclude Include="loader\WaveFileLoader.h" />
-    <ClCompile Include="output\IOutputDevice.h" />
+    <ClInclude Include="output\IOutputDevice.h" />
     <ClInclude Include="output\AsioOutputDevice.h" />
     <ClInclude Include="output\AudioRenderingThread.h" />
     <ClInclude Include="output\DirectSoundOutputDevice.h" />
