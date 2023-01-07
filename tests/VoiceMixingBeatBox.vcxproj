@@ -106,6 +106,8 @@
     <ClCompile Include="utils\WaveFile_36.cpp" />
     <ClCompile Include="utils\WaveFile_40.cpp" />
     <ClCompile Include="utils\WaveFile_42.cpp" />
+    <ClCompile Include="utils\WaveFile_49.cpp" />
+    <ClCompile Include="utils\WaveFile_57.cpp" />
     <ClCompile Include="VoiceMixingBeatBox.cpp" />
   </ItemGroup>
   <ItemGroup>
