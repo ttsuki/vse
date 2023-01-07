@@ -142,8 +142,6 @@ namespace vse
 
     std::shared_ptr<IWaveSource> ConvertWaveFormat(std::shared_ptr<IWaveSource> source, PcmWaveFormat desired_format)
     {
-        if (!source) return nullptr;
-        if (source->GetFormat() == desired_format) return source;
-        return CreateSourceWithProcessing(source, CreateFormatConverter(source->GetFormat(), desired_format));
+        return ConvertWaveFormat(std::move(source), static_cast<WAVEFORMATEXTENSIBLE>(desired_format));
     }
 }

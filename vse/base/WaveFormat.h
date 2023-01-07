@@ -114,8 +114,11 @@ namespace vse
         static PcmWaveFormat Parse(const WAVEFORMATEX& f) noexcept { return Parse(&f); }
         static PcmWaveFormat Parse(const WAVEFORMATEXTENSIBLE& f) noexcept { return Parse(&f.Format); }
 
-        operator WAVEFORMATEX() const noexcept;
-        operator WAVEFORMATEXTENSIBLE() const noexcept;
+        [[nodiscard]] WAVEFORMATEX ToWaveFormatEx() const noexcept;
+        [[nodiscard]] WAVEFORMATEXTENSIBLE ToWaveFormatExtensible() const noexcept { return ToWaveFormatExtensible(BitsPerSample()); }
+        [[nodiscard]] WAVEFORMATEXTENSIBLE ToWaveFormatExtensible(int valid_bits_per_sample) const;
+        operator WAVEFORMATEX() const noexcept { return ToWaveFormatEx(); }
+        operator WAVEFORMATEXTENSIBLE() const noexcept { return ToWaveFormatExtensible(); }
 
         [[nodiscard]] std::string ToString() const;
     };

@@ -11,13 +11,16 @@
 #pragma comment(lib, "mfplat.lib")
 #pragma comment(lib, "wmcodecdspuuid.lib")
 
+#include <memory>
 #include <algorithm>
+#include <stdexcept>
 
 #include "../base/xtl/xtl_temp_memory_buffer.h"
 #include "../base/win32/debug.h"
 
 #include "./DmoWaveProcessor.h"
 #include "./WaveformProcessing.h"
+#include "./WaveSourceWithProcessing.h"
 
 namespace vse
 {
@@ -187,33 +190,45 @@ namespace vse
 namespace vse
 {
     std::shared_ptr<IWaveProcessor> CreateFormatConverter(
-        const WAVEFORMATEXTENSIBLE& input_wfx,
-        const WAVEFORMATEXTENSIBLE& output_wfx)
+        const WAVEFORMATEXTENSIBLE& input_format,
+        const WAVEFORMATEXTENSIBLE& output_format)
     {
-        auto input_format = PcmWaveFormat::Parse(input_wfx);
-        auto output_format = PcmWaveFormat::Parse(output_wfx);
+        auto in = PcmWaveFormat::Parse(input_format);
+        auto out = PcmWaveFormat::Parse(output_format);
 
         // If source and destination formats are same, no need to convert source.
-        if (input_format && output_format && input_format == output_format)
+        if (in && out && in == out)
         {
-            return CreateThruProcessor(input_format);
+            return CreateThruProcessor(in);
         }
 
         // If sampling-rates and channel-counts are same, only bit-depth is need to convert.
-        if (input_format && output_format
-            && input_format.SamplingFrequency() == output_format.SamplingFrequency()
-            && input_format.ChannelCount() == output_format.ChannelCount())
+        if (in && out
+            && in.SamplingFrequency() == out.SamplingFrequency()
+            && in.ChannelCount() == out.ChannelCount())
         {
-            return CreateBitDepthConverter(input_format, output_format.SampleType());
+            return CreateBitDepthConverter(in, out.SampleType());
         }
-
 
         try
         {
-            return CreateAudioResamplingDsp(input_format, output_format);
+            return CreateAudioResamplingDsp(in, out);
         }
         catch (...) {}
 
-        throw std::invalid_argument("Not supported format.");
+        throw std::runtime_error("Not supported format.");
+    }
+
+    std::shared_ptr<IWaveSource> ConvertWaveFormat(
+        std::shared_ptr<IWaveSource> source,
+        const WAVEFORMATEXTENSIBLE& desired_format)
+    {
+        if (!source) return nullptr;
+
+        if (auto desired = PcmWaveFormat::Parse(desired_format);
+            source->GetFormat() == desired)
+            return source;
+
+        return CreateSourceWithProcessing(source, CreateFormatConverter(source->GetFormat(), desired_format));
     }
 }

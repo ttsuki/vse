@@ -4,6 +4,13 @@
 
 #include "WaveFormat.h"
 
+#include <Windows.h>
+#include <mmreg.h>
+
+#include <cstddef>
+#include <string>
+#include <stdexcept>
+
 namespace vse
 {
     static constexpr GUID MEDIA_AUDIO_SUBTYPE(DWORD tag) { return {tag, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71}}; }
@@ -16,7 +23,7 @@ namespace vse
         {
             auto wfx = reinterpret_cast<const WAVEFORMATEXTENSIBLE*>(wf);
             if (wfx->SubFormat == MEDIASUBTYPE_PCM && wfx->Format.wBitsPerSample == 16) return {SampleType::S16, static_cast<SpeakerBit>(wfx->dwChannelMask), static_cast<int>(wfx->Format.nSamplesPerSec)};
-            if (wfx->SubFormat == MEDIASUBTYPE_PCM && wfx->Format.wBitsPerSample == 24) return {SampleType::S24, static_cast<SpeakerBit>(wfx->dwChannelMask), static_cast<int>(wfx->Format.nSamplesPerSec) };
+            if (wfx->SubFormat == MEDIASUBTYPE_PCM && wfx->Format.wBitsPerSample == 24) return {SampleType::S24, static_cast<SpeakerBit>(wfx->dwChannelMask), static_cast<int>(wfx->Format.nSamplesPerSec)};
             if (wfx->SubFormat == MEDIASUBTYPE_PCM && wfx->Format.wBitsPerSample == 32) return {SampleType::S32, static_cast<SpeakerBit>(wfx->dwChannelMask), static_cast<int>(wfx->Format.nSamplesPerSec)};
             if (wfx->SubFormat == MEDIASUBTYPE_IEEE_FLOAT && wfx->Format.wBitsPerSample == 32) return {SampleType::F32, static_cast<SpeakerBit>(wfx->dwChannelMask), static_cast<int>(wfx->Format.nSamplesPerSec)};
             return {SampleType::Unknown, static_cast<SpeakerBit>(wfx->dwChannelMask), static_cast<int>(wfx->Format.nSamplesPerSec)}; // not supported.
@@ -25,7 +32,7 @@ namespace vse
         if ((wf->wFormatTag == WAVE_FORMAT_PCM || wf->wFormatTag == WAVE_FORMAT_IEEE_FLOAT) && DefaultChannelMask(wf->nChannels) != SpeakerBit::None)
         {
             if (wf->wFormatTag == WAVE_FORMAT_PCM && wf->wBitsPerSample == 16) return {SampleType::S16, DefaultChannelMask(wf->nChannels), static_cast<int>(wf->nSamplesPerSec)};
-            if (wf->wFormatTag == WAVE_FORMAT_PCM && wf->wBitsPerSample == 24) return {SampleType::S24, DefaultChannelMask(wf->nChannels), static_cast<int>(wf->nSamplesPerSec) };
+            if (wf->wFormatTag == WAVE_FORMAT_PCM && wf->wBitsPerSample == 24) return {SampleType::S24, DefaultChannelMask(wf->nChannels), static_cast<int>(wf->nSamplesPerSec)};
             if (wf->wFormatTag == WAVE_FORMAT_PCM && wf->wBitsPerSample == 32) return {SampleType::S32, DefaultChannelMask(wf->nChannels), static_cast<int>(wf->nSamplesPerSec)};
             if (wf->wFormatTag == WAVE_FORMAT_IEEE_FLOAT && wf->wBitsPerSample == 32) return {SampleType::F32, DefaultChannelMask(wf->nChannels), static_cast<int>(wf->nSamplesPerSec)};
         }
@@ -33,7 +40,7 @@ namespace vse
         return {SampleType::Unknown, DefaultChannelMask(wf->nChannels), static_cast<int>(wf->nSamplesPerSec)}; // not supported.
     }
 
-    PcmWaveFormat::operator WAVEFORMATEX() const noexcept
+    WAVEFORMATEX PcmWaveFormat::ToWaveFormatEx() const noexcept
     {
         WAVEFORMATEX wfx{};
         wfx.wFormatTag = SampleType() != SampleType::F32 ? WAVE_FORMAT_PCM : WAVE_FORMAT_IEEE_FLOAT;
@@ -46,15 +53,19 @@ namespace vse
         return wfx;
     }
 
-    PcmWaveFormat::operator WAVEFORMATEXTENSIBLE() const noexcept
+    WAVEFORMATEXTENSIBLE PcmWaveFormat::ToWaveFormatExtensible(int valid_bits_per_sample) const
     {
         WAVEFORMATEXTENSIBLE wfx{};
-        wfx.Format = static_cast<WAVEFORMATEX>(*this);
+        wfx.Format = ToWaveFormatEx();
         wfx.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
         wfx.Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
-        wfx.Samples.wValidBitsPerSample = static_cast<WORD>(BitsPerSample());
+        wfx.Samples.wValidBitsPerSample = static_cast<WORD>(valid_bits_per_sample);
         wfx.dwChannelMask = +ChannelMask();
         wfx.SubFormat = SampleType() != SampleType::F32 ? MEDIASUBTYPE_PCM : MEDIASUBTYPE_IEEE_FLOAT;
+
+        if (wfx.Samples.wValidBitsPerSample > wfx.Format.wBitsPerSample)
+            throw std::invalid_argument("wfx.Samples.wValidBitsPerSample > wfx.Format.wBitsPerSample");
+
         return wfx;
     }
 
