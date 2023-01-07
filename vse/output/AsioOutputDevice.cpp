@@ -313,17 +313,29 @@ namespace vse
         {
             host_thread_.invoke([this]
             {
-                if (!driver_)
+                try
                 {
-                    if (auto driver = std::make_unique<asio::AsioHost>(clsid_))
+                    if (!driver_)
                     {
-                        driver->Initialize();
-                        driver->OpenControlPanel();
+                        if (auto driver = std::make_unique<asio::AsioHost>(clsid_))
+                        {
+                            DEBUG_LOG << "Initialize driver to open control panel...";
+                            driver->Initialize();
+                            DEBUG_LOG << "Opening ASIO control panel...";
+                            driver->OpenControlPanel();
+                            DEBUG_LOG << "Closed.";
+                        }
+                    }
+                    else
+                    {
+                        DEBUG_LOG << "Opening ASIO control panel...";
+                        driver_->OpenControlPanel();
+                        DEBUG_LOG << "Closed.";
                     }
                 }
-                else
+                catch (const std::exception& e)
                 {
-                    driver_->OpenControlPanel();
+                    DEBUG_LOG << "FAILED: An error is occurred: " << e.what();
                 }
             });
         }
