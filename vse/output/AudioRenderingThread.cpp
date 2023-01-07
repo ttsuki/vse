@@ -5,16 +5,15 @@
 #include "AudioRenderingThread.h"
 
 #include <Windows.h>
-#include <Objbase.h>
 #include <avrt.h>
 #pragma comment(lib, "Avrt.lib")
 
 #include <atomic>
 #include <memory>
 
+#include "../base/win32/com_base.h"
 #include "../base/win32/event.h"
 #include "../base/win32/thread.h"
-#include "../base/win32/com_ptr.h"
 
 namespace vse
 {
@@ -65,11 +64,10 @@ namespace vse
         private:
             unsigned AudioRenderThreadProc()
             {
-                ::CoInitializeEx(nullptr, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE | COINIT_SPEED_OVER_MEMORY);
+                win32::CoInitializeMTA();
 
                 DWORD task_index = 0;
-                win32::unique_handle_t<HANDLE, decltype(&::AvRevertMmThreadCharacteristics)>
-                    task_handle{::AvSetMmThreadCharacteristicsW(L"Pro Audio", &task_index), &::AvRevertMmThreadCharacteristics};
+                win32::unique_handle_t task_handle{::AvSetMmThreadCharacteristicsW(L"Pro Audio", &task_index), &::AvRevertMmThreadCharacteristics};
 
                 if (task_handle)
                 {
@@ -95,7 +93,7 @@ namespace vse
 
                 task_handle.reset();
 
-                ::CoUninitialize();
+                win32::CoUninitialize();
                 return 0;
             }
         };

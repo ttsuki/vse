@@ -58,7 +58,7 @@ namespace vse
             return Open(AUDCLNT_SHAREMODE_EXCLUSIVE, format, std::chrono::duration_cast<REFERENCE_TIME_duration>(device_period).count());
         }
 
-        bool Open(AUDCLNT_SHAREMODE deviceMode, const WAVEFORMATEXTENSIBLE& format, std::optional<REFERENCE_TIME> period)
+        bool Open(AUDCLNT_SHAREMODE device_mode, const WAVEFORMATEXTENSIBLE& format, std::optional<REFERENCE_TIME> period)
         {
             // Create IAudioClient instance.
             DEBUG_LOG << "Creating IAudioClient instance....";
@@ -129,7 +129,7 @@ namespace vse
 
             HRESULT initialization_result = E_FAIL;
 
-            if (deviceMode == AUDCLNT_SHAREMODE_EXCLUSIVE)
+            if (device_mode == AUDCLNT_SHAREMODE_EXCLUSIVE)
             {
                 // -- EXCLUSIVE MODE --
                 // Check the format is supported by the device.
@@ -206,13 +206,13 @@ namespace vse
             // Initializing...
             if (!SUCCEEDED(initialization_result))
             {
-                DEBUG_LOG << "Initializing " << (deviceMode == AUDCLNT_SHAREMODE_EXCLUSIVE ? "Exclusive" : "Shared") << " mode @ " << ToString(device_format) << "...";
+                DEBUG_LOG << "Initializing " << (device_mode == AUDCLNT_SHAREMODE_EXCLUSIVE ? "Exclusive" : "Shared") << " mode @ " << ToString(device_format) << "...";
 
-                REFERENCE_TIME device_period = period ? *period : deviceMode == AUDCLNT_SHAREMODE_EXCLUSIVE ? minimum_device_period : default_device_period;
+                REFERENCE_TIME device_period = period ? *period : device_mode == AUDCLNT_SHAREMODE_EXCLUSIVE ? minimum_device_period : default_device_period;
                 DEBUG_LOG << "Using DevicePeriod: " << static_cast<double>(device_period) / 10000.0 << "ms.";
 
                 initialization_result = audio_client->Initialize(
-                    deviceMode,
+                    device_mode,
                     stream_flags,
                     device_period,
                     device_period,
@@ -228,7 +228,7 @@ namespace vse
                     DEBUG_LOG << "Using Fixed DevicePeriod: " << static_cast<double>(device_pereod_fixed) / 10000.0 << "ms.";
 
                     initialization_result = audio_client->Initialize(
-                        deviceMode,
+                        device_mode,
                         stream_flags,
                         device_pereod_fixed,
                         device_pereod_fixed,
@@ -253,7 +253,7 @@ namespace vse
             EXPECT_SUCCESS audio_client->GetService(__uuidof(IAudioRenderClient), audio_reder_client.put_void());
 
             // Clear the buffer (first data).
-            if (deviceMode == AUDCLNT_SHAREMODE_EXCLUSIVE)
+            if (device_mode == AUDCLNT_SHAREMODE_EXCLUSIVE)
             {
                 UINT32 frames = 0;
                 LPBYTE ptr = nullptr;
@@ -264,7 +264,7 @@ namespace vse
             }
 
             device_format_ = device_format;
-            device_sharing_mode_ = deviceMode;
+            device_sharing_mode_ = device_mode;
             audio_client_ = std::move(audio_client);
             audio_render_client_ = std::move(audio_reder_client);
 
