@@ -7,6 +7,11 @@
 
 #include "RbjAudioEqProcessor.h"
 
+#include <cstddef>
+#include <memory>
+#include <array>
+#include <stdexcept>
+
 namespace vse
 {
     std::shared_ptr<IWaveProcessor> CreateBiquadIirFilter(PcmWaveFormat format, rbj_audio_eq::Coefficients coefficients)

@@ -4,6 +4,11 @@
 
 #include "HardLimiter.h"
 
+#include <cstddef>
+#include <memory>
+#include <atomic>
+#include <stdexcept>
+
 #include "./WaveformProcessing.h"
 
 namespace vse
